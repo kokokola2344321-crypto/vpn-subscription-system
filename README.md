@@ -163,52 +163,135 @@ docker-compose restart        # Перезапуск
 docker-compose down           # Остановка
 ```
 
-### 🚀 Вариант 4: Быстрое развёртывание на VPS
+## 🚀 Пошаговая инструкция по деплою на VPS
+
+### 1️⃣ Залить код на GitHub
 
 ```bash
+cd /путь/к/проекту
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/ВАШ_НИК/vpn-subscription-system.git
+git push -u origin main
+```
+
+### 2️⃣ Зайти на VPS
+
+```bash
+ssh root@77.91.84.43
+```
+
+Введите пароль от сервера (если не знаете — уточните у хостинг-провайдера).
+
+### 3️⃣ Клонировать репозиторий
+
+```bash
+apt update && apt install -y git
 git clone https://github.com/ВАШ_НИК/vpn-subscription-system.git
 cd vpn-subscription-system
+```
+
+### 4️⃣ Настроить .env
+
+```bash
 cp .env.example .env
 nano .env
+```
+
+Заполните свои данные:
+
+```
+BOT_TOKEN=токен_от_BotFather
+OWNER_ID=ваш_telegram_id
+CHANNEL_ID=-100... (ID канала для проверки подписки)
+TELEGRAM_CHANNEL=@maximikvpn
+API_BASE_URL=https://api.maximikvpn.fun
+DONATION_ALERTS_URL=https://www.donationalerts.com/r/ваш_ник
+BANNER_PATH=/root/vpn_bot/banner.jpg
+```
+
+**Как сохранить в nano:**
+- Редактируете стрелочками
+- После редактирования: `Ctrl + X` → `Y` → `Enter`
+
+### 5️⃣ Запустить проект (выберите один вариант)
+
+**Вариант А — deploy.sh (рекомендую):**
+```bash
 bash deploy.sh
+# Выберите 1 — всё сделает сам: Docker, Nginx, SSL
 ```
 
-Скрипт предлагает три режима:
-1. **Полное развёртывание** — Docker + Nginx Reverse Proxy + SSL (Certbot)
-2. **Только Docker** — без Nginx/SSL
-3. **Только pip** — установка зависимостей через виртуальное окружение
+**Вариант Б — Docker вручную:**
+```bash
+# Установка Docker
+apt install -y docker.io docker-compose
 
-### 🌐 Настройка Nginx и HTTPS
+# Запуск
+mkdir -p data media
+docker-compose up -d --build
+```
 
-Для продакшена на VPS:
+**Вариант В — без Docker:**
+```bash
+pip install -r requirements.txt
+
+# Терминал 1 — API
+screen -S api
+uvicorn backend.main:app --host 0.0.0.0 --port 8000
+# Ctrl+A, D — открепить
+
+# Терминал 2 — Бот
+screen -S bot
+python -m bot.main
+# Ctrl+A, D — открепить
+```
+
+### 6️⃣ Настроить Nginx и HTTPS
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y nginx certbot python3-certbot-nginx
-sudo nano /etc/nginx/sites-available/vpn-api
+apt install -y nginx certbot python3-certbot-nginx
+cp nginx.conf.example /etc/nginx/sites-available/vpn-api
+nano /etc/nginx/sites-available/vpn-api  # проверьте домен
+ln -sf /etc/nginx/sites-available/vpn-api /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+certbot --nginx -d api.maximikvpn.fun
 ```
 
-Пример конфига `/etc/nginx/sites-available/vpn-api`:
-
-```nginx
-server {
-    listen 80;
-    server_name api.maximikvpn.fun;
-
-    location / {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+### 7️⃣ Загрузить баннер
 
 ```bash
-sudo ln -sf /etc/nginx/sites-available/vpn-api /etc/nginx/sites-enabled/
-sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d api.maximikvpn.fun
+mkdir -p /root/vpn_bot
+```
+
+Залейте файл `banner.jpg` через `scp` или FileZilla в `/root/vpn_bot/`.
+
+### 8️⃣ Проверить работу
+
+```bash
+# Проверка API
+curl https://api.maximikvpn.fun/health
+# Ответ: {"status": "ok", "message": "VPN API is running"}
+
+# Откройте Telegram и напишите боту /start
+```
+
+### 🔥 Полезные команды на VPS
+
+```bash
+docker-compose logs -f bot      # Логи бота
+docker-compose logs -f api      # Логи API
+docker-compose restart          # Перезапуск
+docker-compose down && docker-compose up -d --build  # Полный перезапуск с пересборкой
+
+# Если запущено через screen:
+screen -r api                   # Посмотреть логи API
+screen -r bot                   # Посмотреть логи бота
+
+# Обновление кода с GitHub:
+git pull
+docker-compose down && docker-compose up -d --build
 ```
 
 ## 📊 Структура БД
