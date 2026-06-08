@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # === FastAPI Backend ===
+  api:
+    build: .
+    container_name: vpn-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite:///./data/vpn_bot.db
+      - BANNER_PATH=/app/media/banner.jpg
+      - SERVICE=api
+    volumes:
+      - ./data:/app/data
+      - ./media:/app/media
+      - ./.env:/app/.env
+    command: >
+      sh -c "python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000 --workers 2"
+    networks:
+      - vpn-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # === Telegram Bot ===
+  bot:
+    build: .
+    container_name: vpn-bot
+    restart: unless-stopped
+    depends_on:
+      - api
+    env_file:
+      - .env
+    environment:
+      - DATABASE_URL=sqlite:///./data/vpn_bot.db
+      - BANNER_PATH=/app/media/banner.jpg
+      - SERVICE=bot
+    volumes:
+      - ./data:/app/data
+      - ./media:/app/media
+      - ./.env:/app/.env
+    command: >
+      sh -c "python -m bot.main"
+    networks:
+      - vpn-network
+
+networks:
+  vpn-network:
+    driver: bridge

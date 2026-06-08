@@ -1,0 +1,19 @@
+name: MaxiNet Config
+version: 1.0.0
+schema: v1
+
+# Использование только моделей DeepSeek
+models:
+  - name: DeepSeek Chat
+    provider: deepseek
+    model: deepseek-chat
+    apiKey: sk-c96b1966a1c244a5b374d1c807351032
+    
+  - name: DeepSeek Coder
+    provider: deepseek
+    model: deepseek-coder
+    apiKey: sk-c96b1966a1c244a5b374d1c807351032
+
+# MCP Серверы, к которым Continue имеет доступ
+mcpServers:
+  - uses: anthropic/memory-mcp

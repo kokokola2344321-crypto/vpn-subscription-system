@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "vpn-subscription-system"
+version = "1.0.0"
+description = "Полнофункциональная система продажи VPN-подписок с Telegram ботом и FastAPI backend"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+keywords = ["vpn", "telegram-bot", "fastapi", "aiogram", "subscription"]
+
+authors = [
+    {name = "MaximikVPN"},
+]
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: Proxy Servers",
+    "Topic :: Communications :: Chat :: Telegram",
+]
+
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "python-dotenv>=1.0.0",
+    "aiogram>=3.3.0",
+    "aiohttp>=3.9.0",
+    "sqlalchemy>=2.0.23",
+    "alembic>=1.12.1",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "python-dateutil>=2.8.2",
+]
+
+[project.scripts]
+vpn-bot = "bot.main:main"
+vpn-api = "backend.main:app"
+
+[tool.setuptools.packages.find]
+include = ["backend*", "bot*", "shared*"]
