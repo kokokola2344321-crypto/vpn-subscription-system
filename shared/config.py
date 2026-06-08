@@ -32,8 +32,9 @@ FREE_TRIAL_DAYS = int(os.getenv("FREE_TRIAL_DAYS", "5"))
 TEST_PERIOD_DAYS = int(os.getenv("TEST_PERIOD_DAYS", "5"))
 GLOBAL_DISCOUNT = float(os.getenv("GLOBAL_DISCOUNT", "0"))
 
-# === СБП ===
+# === СБП / DONATION ALERTS ===
 SBP_PHONE = os.getenv("SBP_PHONE", "+7XXXXXXXXXX")
+DONATION_ALERTS_URL = os.getenv("DONATION_ALERTS_URL", "https://www.donationalerts.com/r/hlicanasir")
 SUPPORT_PHONE = os.getenv("SUPPORT_PHONE", SBP_PHONE)
 
 # === ЦЕНООБРАЗОВАНИЕ ===

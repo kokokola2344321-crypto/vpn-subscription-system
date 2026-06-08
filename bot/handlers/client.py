@@ -26,7 +26,8 @@ from shared.models import User, Payment
 from shared.config import (
     BANNER_PATH, CHANNEL_ID, SUPPORT_PHONE, API_URL,
     BASE_PRICE_PER_MONTH, REFERRAL_REWARD, FREE_TRIAL_DAYS,
-    TELEGRAM_CHANNEL, API_BASE_URL, TEST_PERIOD_DAYS, SBP_PHONE
+    TELEGRAM_CHANNEL, API_BASE_URL, TEST_PERIOD_DAYS,
+    SBP_PHONE, DONATION_ALERTS_URL
 )
 
 logger = logging.getLogger(__name__)
@@ -632,12 +633,13 @@ async def enter_amount(message: Message, state: FSMContext):
 
         await message.answer(
             f"✅ Сумма: {format_currency(amount)}\n\n"
-            f"💳 Переведите эту сумму по СБП на номер:\n\n"
-            f"`{SBP_PHONE}`\n\n"
-            "После перевода нажмите кнопку ниже.",
+            f"💳 Оплатите донат по ссылке:\n\n"
+            f"🔗 {DONATION_ALERTS_URL}\n\n"
+            "После оплаты нажмите кнопку ниже. Администратор проверит и пополнит баланс.",
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(
                 inline_keyboard=[
+                    [InlineKeyboardButton(text="🔗 Перейти к оплате", url=DONATION_ALERTS_URL)],
                     [InlineKeyboardButton(text="✅ Я оплатил", callback_data="confirm_payment")],
                     [InlineKeyboardButton(text="❌ Отмена", callback_data="cancel_payment")]
                 ]
