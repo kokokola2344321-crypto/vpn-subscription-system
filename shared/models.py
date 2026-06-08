@@ -3,9 +3,8 @@ ORM модели для базы данных
 """
 from datetime import datetime
 from typing import Optional
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
 import uuid
 
 Base = declarative_base()
@@ -26,9 +25,6 @@ class User(Base):
     subscription_token = Column(String, unique=True, index=True, default=lambda: str(uuid.uuid4()))
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationships
-    payments = relationship("Payment", back_populates="user")
 
     def __repr__(self):
         return f"<User {self.telegram_id}>"
@@ -84,9 +80,6 @@ class Payment(Base):
     status = Column(String, default="pending")  # pending, approved, rejected
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-
-    # Relationships
-    user = relationship("User", back_populates="payments")
 
     def __repr__(self):
         return f"<Payment {self.id} - {self.status}>"
